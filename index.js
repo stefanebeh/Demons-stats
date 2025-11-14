@@ -94,7 +94,7 @@ setInterval(async () => {
           .setFooter({ text: "DEMONS Uptime Monitor" });
 
         lastStatusMessage = await channel.send({ 
-          content: "@everyone", 
+          content: "mainsite monitor", 
           embeds: [embed] 
         });
       }
