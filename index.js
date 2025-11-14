@@ -51,8 +51,8 @@ let lastUpTime = null;
 let lastStatus = null;
 let lastStatusMessage = null;
 const STATUS_CHANNEL_ID = "1438903296122163340";
-const MAIN_SITE_URL = "https://www.logged.tg/auth/demonns";
-const MAIN_SITE_NAME = "CORRUPTEDS";
+const MAIN_SITE_URL = "https://www.logged.tg/auth/demonns"; // corrupt → demonns
+const MAIN_SITE_NAME = "DEMONICS"; // corrupted → DEMONICS
 
 // 5.1️⃣ Monitor site la fiecare 30 secunde
 setInterval(async () => {
@@ -82,8 +82,8 @@ setInterval(async () => {
         }
 
         const embed = new EmbedBuilder()
-          .setColor(0x00BFFF)
-          .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif") // FIXED: valid URL
+          .setColor(0xFF0000) // RED
+          .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif")
           .setDescription(
             `<a:Red_fire:1437128732220457094> **SITE STATUS**\n\n` +
             `<a:Red_arrow:1436498527617548348> **${MAIN_SITE_NAME}**\n` +
@@ -125,7 +125,7 @@ client.on('messageCreate', async (message) => {
       const userName = profile.userName || targetUser.username;
 
       const embed = new EmbedBuilder()
-        .setColor(0x00BFFF)
+        .setColor(0xFF0000) // RED
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 128 }))
         .setDescription(`─── <a:84480crownred:1437446970955403308> **NORMAL INFO** <a:84480crownred:1437446970955403308> ───
 
@@ -160,7 +160,7 @@ Robux: ${formatNumber(normal.Totals?.Balance)}
   // ===== !daily =====
   if (message.content.startsWith('!daily')) {
     try {
-      const res = await fetchWithTimeout(`https://api.injuries.lu/v2/daily?type=0x2&cs=3&ref=corrupteds&userId=${targetId}`);
+      const res = await fetchWithTimeout(`https://api.injuries.lu/v2/daily?type=0x2&cs=3&ref=demonics&userId=${targetId}`); // corrupteds → demonics
       const data = await res.json();
 
       if (!data.success) return message.reply("❌ No daily stats available.");
@@ -170,7 +170,7 @@ Robux: ${formatNumber(normal.Totals?.Balance)}
       const userName = profile.userName || targetUser.username;
 
       const embed = new EmbedBuilder()
-        .setColor(0x00BFFF)
+        .setColor(0xFF0000)
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 128 }))
         .setDescription(`─── <a:84480crownred:1437446970955403308> **DAILY STATS** <a:84480crownred:1437446970955403308> ───
 
@@ -192,7 +192,7 @@ RAP: ${formatNumber(daily.Totals?.Rap)}
 Robux: ${formatNumber(daily.Totals?.Balance)}
 `)
         .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif")
-        .setFooter({ text: "Stats Bot Daily" });
+        .setFooter({ text: "DEMONS Daily Bot" });
 
       await message.channel.send({ embeds: [embed] });
 
@@ -221,7 +221,7 @@ Robux: ${formatNumber(daily.Totals?.Balance)}
       let uptimeText = res.ok && lastUpTime ? `UP for ${formatDuration(Date.now() - lastUpTime)}` : "❌ No uptime data";
 
       const embed = new EmbedBuilder()
-        .setColor(0x00BFFF)
+        .setColor(0xFF0000)
         .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif")
         .setDescription(`<a:emoji_23:1437165438315532431> **SITE STATUS**\n\n` +
           `<a:Red_arrow:1436498527617548348> **${MAIN_SITE_NAME}**\n` +
@@ -240,7 +240,7 @@ Robux: ${formatNumber(daily.Totals?.Balance)}
     }
   }
 
-  // ===== !emojiinfo ===== (NEW - embed-ul tău cu info despre emoji)
+  // ===== !emojiinfo =====
   if (message.content.startsWith("!emojiinfo")) {
     const embed = new EmbedBuilder()
       .setColor(0xFF0000)
