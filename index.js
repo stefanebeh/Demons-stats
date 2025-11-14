@@ -49,7 +49,7 @@ async function fetchWithTimeout(url, options = {}, timeout = 10000) {
 // 5️⃣ Config Uptime Monitor
 let lastUpTime = null;
 let lastStatus = null;
-let lastStatusMessage = null; // 🆕 ultimul mesaj trimis
+let lastStatusMessage = null;
 const STATUS_CHANNEL_ID = "1438903296122163340";
 const MAIN_SITE_URL = "https://www.logged.tg/auth/demonns";
 const MAIN_SITE_NAME = "CORRUPTEDS";
@@ -77,32 +77,22 @@ setInterval(async () => {
       const channel = client.channels.cache.get(STATUS_CHANNEL_ID);
       if (channel) {
 
-        // 🆕 Șterge mesajul anterior dacă există
         if (lastStatusMessage) {
           try { await lastStatusMessage.delete().catch(() => {}); } catch {}
         }
 
         const embed = new EmbedBuilder()
           .setColor(0x00BFFF)
-          .setThumbnail("## Info about emote 'red_uzi':
-**ID:** 1436875117656408224
-**Uses in this server:** 0
-### Uploaded at:
-<t:1762648123:f> (<t:1762648123:R>)
-### Animated URL:
-https://cdn.discordapp.com/emojis/1436875117656408224.gif
-### Static URL:
-https://cdn.discordapp.com/emojis/1436875117656408224.png")
+          .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif") // FIXED: valid URL
           .setDescription(
             `<a:Red_fire:1437128732220457094> **SITE STATUS**\n\n` +
             `<a:Red_arrow:1436498527617548348> **${MAIN_SITE_NAME}**\n` +
             `<a:Red_arrow:1436498527617548348> STATUS: ${currentStatus}\n` +
             `<a:Red_arrow:1436498527617548348> Response Time: ${ping ? ping + "ms" : "N/A"}`
           )
-          .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+          .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif")
           .setFooter({ text: "DEMONS Uptime Monitor" });
 
-        // 🆕 Trimite cu @everyone + salvează mesajul
         lastStatusMessage = await channel.send({ 
           content: "@everyone", 
           embeds: [embed] 
@@ -115,7 +105,7 @@ https://cdn.discordapp.com/emojis/1436875117656408224.png")
   } catch (err) { console.error("Error checking site:", err); }
 }, 30000);
 
-// 6️⃣ Event listener pentru mesaje
+// 6️⃣ Event listener pentru comenzi
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
@@ -156,7 +146,7 @@ Summary: ${formatNumber(normal.Totals?.Summary)}
 RAP: ${formatNumber(normal.Totals?.Rap)}
 Robux: ${formatNumber(normal.Totals?.Balance)}
 `)
-        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif")
         .setFooter({ text: "DEMONS Stats Bot" });
 
       await message.channel.send({ embeds: [embed] });
@@ -201,7 +191,7 @@ Summary: ${formatNumber(daily.Totals?.Summary)}
 RAP: ${formatNumber(daily.Totals?.Rap)}
 Robux: ${formatNumber(daily.Totals?.Balance)}
 `)
-        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif")
         .setFooter({ text: "Stats Bot Daily" });
 
       await message.channel.send({ embeds: [embed] });
@@ -239,7 +229,7 @@ Robux: ${formatNumber(daily.Totals?.Balance)}
           `<a:Red_arrow:1436498527617548348> UPTIME: ${uptimeText}\n` +
           `<a:Red_arrow:1436498527617548348> Response Time: ${ping ? ping + "ms" : "N/A"}`
         )
-        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif")
         .setFooter({ text: "DEMONS Uptime Monitor" });
 
       await message.channel.send({ embeds: [embed] });
@@ -248,6 +238,27 @@ Robux: ${formatNumber(daily.Totals?.Balance)}
       console.error(err);
       message.reply("❌ Error checking site: site did not respond in 10 seconds.");
     }
+  }
+
+  // ===== !emojiinfo ===== (NEW - embed-ul tău cu info despre emoji)
+  if (message.content.startsWith("!emojiinfo")) {
+    const embed = new EmbedBuilder()
+      .setColor(0xFF0000)
+      .setTitle("Emoji Info – red_uzi")
+      .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif")
+      .setDescription(
+        `### Info about emote **red_uzi**:\n\n` +
+        `**ID:** 1436875117656408224\n` +
+        `**Uses in this server:** 0\n\n` +
+        `### Uploaded at:\n` +
+        `<t:1762648123:f> (<t:1762648123:R>)\n\n` +
+        `### Animated URL:\n` +
+        `https://cdn.discordapp.com/emojis/1436875117656408224.gif\n\n` +
+        `### Static URL:\n` +
+        `https://cdn.discordapp.com/emojis/1436875117656408224.png`
+      );
+
+    await message.channel.send({ embeds: [embed] });
   }
 
 });
