@@ -129,7 +129,7 @@ client.on('messageCreate', async (message) => {
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 128 }))
         .setDescription(`─── <a:84480crownred:1437446970955403308> **NORMAL INFO** <a:84480crownred:1437446970955403308> ───
 
-<a:emoji_21:1437163698161717468> **User:** **${userName}**
+<a:Red_arrow:1436498527617548348> **User:** **${userName}**
 
 <a:Red_arrow:1436498527617548348> **TOTAL STATS:**
 Hits: ${formatNumber(normal.Totals?.Accounts)}
