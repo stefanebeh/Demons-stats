@@ -1,0 +1,260 @@
+// 1️⃣ Importuri
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const fetch = require('node-fetch');
+const express = require('express');
+
+// 2️⃣ Server Express pentru keep-alive (Render)
+const app = express();
+const PORT = process.env.PORT || 3000;
+app.get("/", (req, res) => res.send("Bot is alive ✅"));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// 3️⃣ Creezi clientul Discord
+const client = new Client({ 
+  intents: [
+    GatewayIntentBits.Guilds, 
+    GatewayIntentBits.GuildMessages, 
+    GatewayIntentBits.MessageContent
+  ] 
+});
+
+const TOKEN = process.env.DISCORD_BOT_TOKEN;
+
+// 4️⃣ Funcții utile
+function formatNumber(num) { return num?.toLocaleString() || "0"; }
+function formatDuration(ms) {
+  let sec = Math.floor(ms / 1000);
+  let min = Math.floor(sec / 60);
+  let hr = Math.floor(min / 60);
+  sec %= 60; min %= 60;
+  return `${hr}h ${min}m ${sec}s`;
+}
+
+// 4.1️⃣ Helper fetch cu timeout 10 sec
+async function fetchWithTimeout(url, options = {}, timeout = 10000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  options.signal = controller.signal;
+
+  try {
+    const res = await fetch(url, options);
+    return res;
+  } catch (err) {
+    throw new Error("Request timed out or failed");
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+// 5️⃣ Config Uptime Monitor
+let lastUpTime = null;
+let lastStatus = null;
+let lastStatusMessage = null; // 🆕 ultimul mesaj trimis
+const STATUS_CHANNEL_ID = "1438903296122163340";
+const MAIN_SITE_URL = "https://www.logged.tg/auth/demonns";
+const MAIN_SITE_NAME = "CORRUPTEDS";
+
+// 5.1️⃣ Monitor site la fiecare 30 secunde
+setInterval(async () => {
+  try {
+    const start = Date.now();
+    let res, ping;
+
+    try { 
+      const response = await fetch(MAIN_SITE_URL); 
+      res = { ok: response.ok }; 
+      ping = Date.now() - start; 
+    } catch { 
+      res = { ok: false }; 
+      ping = null; 
+    }
+
+    let currentStatus = res.ok ? "UP" : "DOWN";
+    if (res.ok && !lastUpTime) lastUpTime = Date.now();
+    if (!res.ok) lastUpTime = null;
+
+    if (currentStatus !== lastStatus) {
+      const channel = client.channels.cache.get(STATUS_CHANNEL_ID);
+      if (channel) {
+
+        // 🆕 Șterge mesajul anterior dacă există
+        if (lastStatusMessage) {
+          try { await lastStatusMessage.delete().catch(() => {}); } catch {}
+        }
+
+        const embed = new EmbedBuilder()
+          .setColor(0x00BFFF)
+          .setThumbnail("## Info about emote 'red_uzi':
+**ID:** 1436875117656408224
+**Uses in this server:** 0
+### Uploaded at:
+<t:1762648123:f> (<t:1762648123:R>)
+### Animated URL:
+https://cdn.discordapp.com/emojis/1436875117656408224.gif
+### Static URL:
+https://cdn.discordapp.com/emojis/1436875117656408224.png")
+          .setDescription(
+            `<a:Red_fire:1437128732220457094> **SITE STATUS**\n\n` +
+            `<a:Red_arrow:1436498527617548348> **${MAIN_SITE_NAME}**\n` +
+            `<a:Red_arrow:1436498527617548348> STATUS: ${currentStatus}\n` +
+            `<a:Red_arrow:1436498527617548348> Response Time: ${ping ? ping + "ms" : "N/A"}`
+          )
+          .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+          .setFooter({ text: "DEMONS Uptime Monitor" });
+
+        // 🆕 Trimite cu @everyone + salvează mesajul
+        lastStatusMessage = await channel.send({ 
+          content: "@everyone", 
+          embeds: [embed] 
+        });
+      }
+
+      lastStatus = currentStatus;
+    }
+
+  } catch (err) { console.error("Error checking site:", err); }
+}, 30000);
+
+// 6️⃣ Event listener pentru mesaje
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+
+  const targetUser = message.mentions.users.first() || message.author;
+  const targetId = targetUser.id;
+
+  // ===== !stats =====
+  if (message.content.startsWith('!stats')) {
+    try {
+      const res = await fetchWithTimeout(`https://api.injuries.lu/v1/public/user?userId=${targetId}`);
+      const data = await res.json();
+
+      if (!data.success || !data.Normal) return message.reply("❌ No stats found.");
+
+      const normal = data.Normal;
+      const profile = data.Profile || {};
+      const userName = profile.userName || targetUser.username;
+
+      const embed = new EmbedBuilder()
+        .setColor(0x00BFFF)
+        .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 128 }))
+        .setDescription(`─── <a:84480crownred:1437446970955403308> **NORMAL INFO** <a:84480crownred:1437446970955403308> ───
+
+<a:emoji_21:1437163698161717468> **User:** **${userName}**
+
+<a:Red_arrow:1436498527617548348> **TOTAL STATS:**
+Hits: ${formatNumber(normal.Totals?.Accounts)}
+Visits: ${formatNumber(normal.Totals?.Visits)}
+Clicks: ${formatNumber(normal.Totals?.Clicks)}
+
+<a:Red_arrow:1436498527617548348> **BIGGEST HIT:**
+Summary: ${formatNumber(normal.Highest?.Summary)}
+RAP: ${formatNumber(normal.Highest?.Rap)}
+Robux: ${formatNumber(normal.Highest?.Balance)}
+
+<a:Red_arrow:1436498527617548348> **TOTAL HIT STATS:**
+Summary: ${formatNumber(normal.Totals?.Summary)}
+RAP: ${formatNumber(normal.Totals?.Rap)}
+Robux: ${formatNumber(normal.Totals?.Balance)}
+`)
+        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+        .setFooter({ text: "DEMONS Stats Bot" });
+
+      await message.channel.send({ embeds: [embed] });
+
+    } catch (err) {
+      console.error(err);
+      message.reply("❌ Error fetching stats: site/API did not respond in 10 seconds.");
+    }
+  }
+
+  // ===== !daily =====
+  if (message.content.startsWith('!daily')) {
+    try {
+      const res = await fetchWithTimeout(`https://api.injuries.lu/v2/daily?type=0x2&cs=3&ref=corrupteds&userId=${targetId}`);
+      const data = await res.json();
+
+      if (!data.success) return message.reply("❌ No daily stats available.");
+
+      const daily = data.Daily || data.Normal;
+      const profile = data.Profile || {};
+      const userName = profile.userName || targetUser.username;
+
+      const embed = new EmbedBuilder()
+        .setColor(0x00BFFF)
+        .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 128 }))
+        .setDescription(`─── <a:84480crownred:1437446970955403308> **DAILY STATS** <a:84480crownred:1437446970955403308> ───
+
+<a:84480crownred:1437446970955403308> **User:** **${userName}**
+
+<a:Red_arrow:1436498527617548348> **DAILY STATS:**
+Hits: ${formatNumber(daily.Totals?.Accounts)}
+Visits: ${formatNumber(daily.Totals?.Visits)}
+Clicks: ${formatNumber(daily.Totals?.Clicks)}
+
+<a:emoji_21:1437163698161717468> **BIGGEST HIT:**
+Summary: ${formatNumber(daily.Highest?.Summary)}
+RAP: ${formatNumber(daily.Highest?.Rap)}
+Robux: ${formatNumber(daily.Highest?.Balance)}
+
+<a:Red_arrow:1436498527617548348> **TOTAL HIT STATS:**
+Summary: ${formatNumber(daily.Totals?.Summary)}
+RAP: ${formatNumber(daily.Totals?.Rap)}
+Robux: ${formatNumber(daily.Totals?.Balance)}
+`)
+        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+        .setFooter({ text: "Stats Bot Daily" });
+
+      await message.channel.send({ embeds: [embed] });
+
+    } catch (err) {
+      console.error(err);
+      message.reply("❌ Error fetching daily stats: site/API did not respond in 10 seconds.");
+    }
+  }
+
+  // ===== !check =====
+  if (message.content.startsWith('!check')) {
+    try {
+      const start = Date.now();
+      let res, ping;
+
+      try { 
+        const response = await fetchWithTimeout(MAIN_SITE_URL, {}, 10000); 
+        res = { ok: response.ok }; 
+        ping = Date.now() - start; 
+      } catch { 
+        res = { ok: false }; 
+        ping = null; 
+      }
+
+      let statusText = res.ok ? "<a:emoji_22:1437165310775132160> ONLINE" : "<a:emoji_22:1437165310775132160> OFFLINE";
+      let uptimeText = res.ok && lastUpTime ? `UP for ${formatDuration(Date.now() - lastUpTime)}` : "❌ No uptime data";
+
+      const embed = new EmbedBuilder()
+        .setColor(0x00BFFF)
+        .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif")
+        .setDescription(`<a:emoji_23:1437165438315532431> **SITE STATUS**\n\n` +
+          `<a:Red_arrow:1436498527617548348> **${MAIN_SITE_NAME}**\n` +
+          `<a:Red_fire:1437128732220457094> STATUS: ${statusText}\n` +
+          `<a:Red_arrow:1436498527617548348> UPTIME: ${uptimeText}\n` +
+          `<a:Red_arrow:1436498527617548348> Response Time: ${ping ? ping + "ms" : "N/A"}`
+        )
+        .setImage("https://cdn.discordapp.com/attachments/1438893388056367135/1438903764638634146/standard3.gif?ex=6918930f&is=6917418f&hm=13c18d297c8f08e9d2e0c139bbcbccfaafbb8b109e91955897428f4b93250ee5&")
+        .setFooter({ text: "DEMONS Uptime Monitor" });
+
+      await message.channel.send({ embeds: [embed] });
+
+    } catch (err) {
+      console.error(err);
+      message.reply("❌ Error checking site: site did not respond in 10 seconds.");
+    }
+  }
+
+});
+
+// 7️⃣ Error handler
+client.on('error', (error) => console.error('Discord client error:', error));
+
+// 8️⃣ Login bot
+if (!TOKEN) { console.error('❌ DISCORD_BOT_TOKEN is not set!'); process.exit(1); }
+client.login(TOKEN);
