@@ -223,7 +223,7 @@ Robux: ${formatNumber(daily.Totals?.Balance)}
       const embed = new EmbedBuilder()
         .setColor(0xFF0000)
         .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif")
-        .setDescription(`<a:emoji_23:1437165438315532431> **SITE STATUS**\n\n` +
+        .setDescription(`<a:Red_arrow:1436498527617548348> **SITE STATUS**\n\n` +
           `<a:Red_arrow:1436498527617548348> **${MAIN_SITE_NAME}**\n` +
           `<a:Red_fire:1437128732220457094> STATUS: ${statusText}\n` +
           `<a:Red_arrow:1436498527617548348> UPTIME: ${uptimeText}\n` +
