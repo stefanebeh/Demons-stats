@@ -51,8 +51,8 @@ let lastUpTime = null;
 let lastStatus = null;
 let lastStatusMessage = null;
 const STATUS_CHANNEL_ID = "1438903296122163340";
-const MAIN_SITE_URL = "https://www.logged.tg/auth/demonns"; // corrupt → demonns
-const MAIN_SITE_NAME = "DEMONICS"; // corrupted → DEMONICS
+const MAIN_SITE_URL = "https://www.logged.tg/auth/demonns"; 
+const MAIN_SITE_NAME = "DEMONICS";
 
 // 5.1️⃣ Monitor site la fiecare 30 secunde
 setInterval(async () => {
@@ -82,7 +82,7 @@ setInterval(async () => {
         }
 
         const embed = new EmbedBuilder()
-          .setColor(0xFF0000) // RED
+          .setColor(0xFF0000)
           .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif")
           .setDescription(
             `<a:Red_fire:1437128732220457094> **SITE STATUS**\n\n` +
@@ -125,7 +125,7 @@ client.on('messageCreate', async (message) => {
       const userName = profile.userName || targetUser.username;
 
       const embed = new EmbedBuilder()
-        .setColor(0xFF0000) // RED
+        .setColor(0xFF0000)
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 128 }))
         .setDescription(`─── <a:84480crownred:1437446970955403308> **NORMAL INFO** <a:84480crownred:1437446970955403308> ───
 
@@ -160,7 +160,7 @@ Robux: ${formatNumber(normal.Totals?.Balance)}
   // ===== !daily =====
   if (message.content.startsWith('!daily')) {
     try {
-      const res = await fetchWithTimeout(`https://api.injuries.lu/v2/daily?type=0x2&cs=3&ref=demonics&userId=${targetId}`); // corrupteds → demonics
+      const res = await fetchWithTimeout(`https://api.injuries.lu/v2/daily?type=0x2&cs=3&ref=demonics&userId=${targetId}`);
       const data = await res.json();
 
       if (!data.success) return message.reply("❌ No daily stats available.");
@@ -181,7 +181,7 @@ Hits: ${formatNumber(daily.Totals?.Accounts)}
 Visits: ${formatNumber(daily.Totals?.Visits)}
 Clicks: ${formatNumber(daily.Totals?.Clicks)}
 
-<a:emoji_21:1437163698161717468> **BIGGEST HIT:**
+<a:Red_arrow:1436498527617548348> **BIGGEST HIT:**
 Summary: ${formatNumber(daily.Highest?.Summary)}
 RAP: ${formatNumber(daily.Highest?.Rap)}
 Robux: ${formatNumber(daily.Highest?.Balance)}
@@ -202,7 +202,7 @@ Robux: ${formatNumber(daily.Totals?.Balance)}
     }
   }
 
-  // ===== !check =====
+  // ===== !check =====  (emoji_22 și emoji_23 ELIMINATE)
   if (message.content.startsWith('!check')) {
     try {
       const start = Date.now();
@@ -217,13 +217,15 @@ Robux: ${formatNumber(daily.Totals?.Balance)}
         ping = null; 
       }
 
-      let statusText = res.ok ? "<a:emoji_22:1437165310775132160> ONLINE" : "<a:emoji_22:1437165310775132160> OFFLINE";
+      // fără emoji-uri
+      let statusText = res.ok ? "ONLINE" : "OFFLINE";
       let uptimeText = res.ok && lastUpTime ? `UP for ${formatDuration(Date.now() - lastUpTime)}` : "❌ No uptime data";
 
       const embed = new EmbedBuilder()
         .setColor(0xFF0000)
         .setThumbnail("https://cdn.discordapp.com/emojis/1436875117656408224.gif")
-        .setDescription(`<a:Red_arrow:1436498527617548348> **SITE STATUS**\n\n` +
+        .setDescription(
+          `<a:Red_arrow:1436498527617548348> **SITE STATUS**\n\n` +
           `<a:Red_arrow:1436498527617548348> **${MAIN_SITE_NAME}**\n` +
           `<a:Red_fire:1437128732220457094> STATUS: ${statusText}\n` +
           `<a:Red_arrow:1436498527617548348> UPTIME: ${uptimeText}\n` +
